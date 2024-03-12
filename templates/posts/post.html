@@ -1,0 +1,69 @@
+<!--  наследуемся от шаблона default.html, который мы создавали для flatpages -->
+{% extends 'flatpages/default.html' %}
+
+{% block title %}
+    Объявление
+{% endblock title %}
+
+<!-- В контенте на странице мы выводим объявление, идентификатор которой был передан в url -->
+{% block content %}
+    <br><br>
+    {% if post.author == request.user %}
+        {% if perms.board.change_post %}
+            <a class="btn btn-primary" href="{% url 'edit_post' post.id %}">Изменить </a>
+        {% endif %}
+        {% if perms.board.delete_post %}
+            <a class="btn btn-primary" href="{% url 'delete_post' post.id %}">Удалить </a>
+        {% endif %}
+    {% endif %}
+    <h2>{{ post.title }}</h2>
+    <p>{{ post.data_creation|date:'d.m.Y' }} | {{ post.author }}</p>
+    <p>Категория: <b>{{ post.get_category_display }}</b></p>
+
+    <p align="justify">{{ post.content }}</p>
+
+
+    {% if post.author != request.user %}
+        {% if request.user.is_authenticated %}
+            <hr>
+
+            <!-- Форма для отправки отклика -->
+            <form method="post" action="{% url 'create_response' post_id=post.id %}">
+                {% csrf_token %}
+                <label for="content">Текст отклика:</label><br>
+                <textarea cols="35" rows="3" id="content" name="content"></textarea><br>
+                <button type="submit">Отправить отклик</button>
+            </form>
+        {% endif %}
+
+        <hr>
+    {% endif %}
+    <!-- Отображение откликов -->
+    <h3>Отклики</h3>
+    {% if post.author == request.user %}
+    <a class="btn btn-primary" href="{% url 'profile' %}?post_id={{ post.id }}">Принять/отклонить</a>
+        {% endif %}
+    {% for response in responses %}
+        {% if response.author != request.user and response.status != 'rejected' or response.author == request.user %}
+            <div>
+                <p>Автор: {{ response.author }} | Дата создания: {{ response.data_creation|date:'d.m.Y' }}</p>
+                <p>Текст: {{ response.content }}</p>
+                {% if response.author == request.user%}
+                    {% if response.status == 'accepted' %}
+                        <p style="color: green"><b>Отклик принят</b></p>
+                    {% elif response.status == 'rejected' %}
+                        {% if response.author == request.user %}
+                            <p style="color: red"><b>Ваш отклик был отклонен</b></p>
+                        {% endif %}
+                    {% elif response.status == 'pending' %}
+                        <p style="color: orange"><b>Отклик необработан</b></p>
+                    {% endif %}
+                {% endif %}
+                <hr>
+            </div>
+        {% endif %}
+    {% empty %}
+        <p>Нет откликов</p>
+    {% endfor %}
+
+{% endblock content %}

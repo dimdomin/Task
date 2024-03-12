@@ -1,0 +1,13 @@
+{% extends 'flatpages/default.html' %}
+{% block title %}
+Отклик
+{% endblock title %}
+{% block content %}
+ <h1>Отклик</h1>
+<form method="post" action="{% url 'create_response' post_id=post.id %}">
+  {% csrf_token %}
+  <label for="content">Текст отклика:</label>
+  <textarea id="content" name="content"></textarea>
+  <button type="submit">Отправить отклик</button>
+</form>
+{% endblock %}

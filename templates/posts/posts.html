@@ -1,0 +1,37 @@
+<!--  наследуемся от шаблона default.html, который мы создавали для flatpages -->
+{% extends 'flatpages/default.html' %}
+
+{% block title %}
+    Объявления
+{% endblock title %}
+
+{% block content %}
+    <h1>Все объявления</h1>
+    <h3>Всего объявлений - {{ page_obj.paginator.count }}</h3>
+    <hr>
+    <!-- Выводим посты, только если они есть с помощью тега if -->
+    {% if posts %}
+        <table style="border: 2px solid white">
+            <tr>
+                <td style="border: 1px solid maroon">Дата создания/автор</td>
+                <td style="border: 1px solid maroon">Заголовок</td>
+                <td style="border: 1px solid maroon">Категории</td>
+                <td style="border: 1px solid maroon">Описание</td>
+            </tr>
+            {% for post in posts %}
+                <tr>
+                    <td style="border: 1px solid maroon; text-align: left; padding: 10px">{{ post.data_creation|date:'d.m.Y' }}<br>Автор: {{ post.author }}
+                    </td>
+                    <td style="border: 1px solid maroon; padding: 10px"><a href="{% url 'post' post.id %}">{{ post.title }}</a></td>
+                    <td style="border: 1px solid maroon; text-align: left; padding: 10px">{{ post.get_category_display }}</td>
+                    <td style="border: 1px solid maroon; text-align: left; padding: 10px">{{ post.content }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <!-- Если новостей нет, говорим, что их нет ;) -->
+        <h2>Пусто!!!</h2>
+    {% endif %}
+    <!--Добавляем пагинацию-->
+    {% include 'posts/paginator.html' %}
+{% endblock content %}
